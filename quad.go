@@ -37,7 +37,6 @@ package quad
 // the consequences are not to be taken lightly. But do suggest cool features!
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -47,99 +46,12 @@ var (
 	ErrIncomplete = errors.New("incomplete N-Quad")
 )
 
-// Make creates a quad with provided values.
-func Make(subject, predicate, object, label interface{}) (q Quad) {
-	var ok bool
-	if q.Subject, ok = AsValue(subject); !ok {
-		q.Subject = String(fmt.Sprint(subject))
-	}
-	if q.Predicate, ok = AsValue(predicate); !ok {
-		q.Predicate = String(fmt.Sprint(predicate))
-	}
-	if q.Object, ok = AsValue(object); !ok {
-		q.Object = String(fmt.Sprint(object))
-	}
-	if q.Label, ok = AsValue(label); !ok {
-		q.Label = String(fmt.Sprint(label))
-	}
-	return
-}
-
-// MakeRaw creates a quad with provided raw values (nquads-escaped).
-//
-// Deprecated: use Make pr MakeIRI instead.
-func MakeRaw(subject, predicate, object, label string) (q Quad) {
-	if subject != "" {
-		q.Subject = Raw(subject)
-	}
-	if predicate != "" {
-		q.Predicate = Raw(predicate)
-	}
-	if object != "" {
-		q.Object = Raw(object)
-	}
-	if label != "" {
-		q.Label = Raw(label)
-	}
-	return
-}
-
-// MakeIRI creates a quad with provided IRI values.
-func MakeIRI(subject, predicate, object, label string) (q Quad) {
-	if subject != "" {
-		q.Subject = IRI(subject)
-	}
-	if predicate != "" {
-		q.Predicate = IRI(predicate)
-	}
-	if object != "" {
-		q.Object = IRI(object)
-	}
-	if label != "" {
-		q.Label = IRI(label)
-	}
-	return
-}
-
-var (
-	_ json.Marshaler   = Quad{}
-	_ json.Unmarshaler = (*Quad)(nil)
-)
-
 // Our quad struct, used throughout.
 type Quad struct {
-	Subject   Value `json:"subject"`
-	Predicate Value `json:"predicate"`
-	Object    Value `json:"object"`
-	Label     Value `json:"label,omitempty"`
-}
-
-type rawQuad struct {
-	Subject   string `json:"subject"`
-	Predicate string `json:"predicate"`
-	Object    string `json:"object"`
-	Label     string `json:"label,omitempty"`
-}
-
-func (q Quad) MarshalJSON() ([]byte, error) {
-	rq := rawQuad{
-		Subject:   ToString(q.Subject),
-		Predicate: ToString(q.Predicate),
-		Object:    ToString(q.Object),
-	}
-	if q.Label != nil {
-		rq.Label = ToString(q.Label)
-	}
-	return json.Marshal(rq)
-}
-func (q *Quad) UnmarshalJSON(data []byte) error {
-	var rq rawQuad
-	if err := json.Unmarshal(data, &rq); err != nil {
-		return err
-	}
-	// TODO(dennwc): parse nquads? or use StringToValue hack?
-	*q = MakeRaw(rq.Subject, rq.Predicate, rq.Object, rq.Label)
-	return nil
+	Subject   RawValue `json:"subject"`
+	Predicate RawValue `json:"predicate"`
+	Object    RawValue `json:"object"`
+	Label     RawValue `json:"label,omitempty"`
 }
 
 // Direction specifies an edge's type.
@@ -223,7 +135,7 @@ func (q Quad) Get(d Direction) Value {
 	}
 }
 
-func (q *Quad) Set(d Direction, v Value) {
+func (q *Quad) Set(d Direction, v RawValue) {
 	switch d {
 	case Subject:
 		q.Subject = v
@@ -233,8 +145,6 @@ func (q *Quad) Set(d Direction, v Value) {
 		q.Label = v
 	case Object:
 		q.Object = v
-	default:
-		panic(d.String())
 	}
 }
 
@@ -250,7 +160,7 @@ func (q Quad) GetString(d Direction) string {
 	case Label:
 		return StringOf(q.Label)
 	default:
-		panic(d.String())
+		return ""
 	}
 }
 
@@ -265,7 +175,7 @@ func (q Quad) IsValid() bool {
 
 // Prints a quad in N-Quad format.
 func (q Quad) NQuad() string {
-	if q.Label == nil || q.Label.String() == "" {
+	if len(q.Label) == 0 {
 		return fmt.Sprintf("%s %s %s .", q.Subject, q.Predicate, q.Object)
 	}
 	return fmt.Sprintf("%s %s %s %s .", q.Subject, q.Predicate, q.Object, q.Label)
