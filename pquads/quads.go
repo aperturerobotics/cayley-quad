@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/cayleygraph/quad"
+	"github.com/golang/protobuf/proto"
 )
 
 //go:generate protoc --proto_path=$GOPATH/src:. --gogo_out=. quads.proto
@@ -57,7 +58,8 @@ func MarshalValue(v quad.Value) ([]byte, error) {
 	if v == nil {
 		return nil, nil
 	}
-	return MakeValue(v).Marshal()
+	val := MakeValue(v)
+	return proto.Marshal(val)
 }
 
 // UnmarshalValue is a helper for deserialization of quad.Value.
@@ -65,8 +67,8 @@ func UnmarshalValue(data []byte) (quad.Value, error) {
 	if len(data) == 0 {
 		return nil, nil
 	}
-	var v Value
-	if err := v.Unmarshal(data); err != nil {
+	v := &Value{}
+	if err := proto.Unmarshal(data, v); err != nil {
 		return nil, err
 	}
 	return v.ToNative(), nil

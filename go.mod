@@ -1,10 +1,7 @@
 module github.com/cayleygraph/quad
 
-go 1.12
+go 1.16
 
-require (
-	github.com/gogo/protobuf v1.3.0
-	github.com/linkeddata/gojsonld v0.0.0-20170418210642-4f5db6791326
-	github.com/piprate/json-gold v0.3.0
-	github.com/stretchr/testify v1.4.0
-)
+replace github.com/golang/protobuf => github.com/aperturerobotics/go-protobuf-1.3.x v0.0.0-20200726220404-fa7f51c52df0 // aperture-1.3.x
+
+require github.com/golang/protobuf v1.5.2
