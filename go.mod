@@ -1,7 +1,9 @@
 module github.com/cayleygraph/quad
 
-go 1.16
+go 1.19
 
-replace github.com/golang/protobuf => github.com/aperturerobotics/go-protobuf-1.3.x v0.0.0-20200726220404-fa7f51c52df0 // aperture-1.3.x
+replace google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1.30.1-0.20230428014030-7089409cbc63 // aperture
 
-require github.com/golang/protobuf v1.5.2
+require github.com/golang/protobuf v1.5.3
+
+require google.golang.org/protobuf v1.26.0 // indirect

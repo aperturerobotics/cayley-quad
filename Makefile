@@ -45,7 +45,7 @@ genproto: $(GOIMPORTS) $(PROTOWRAP) $(PROTOC_GEN_GO) vendor
 	ln -s $$(pwd) $$(pwd)/vendor/$${PROJECT} ; \
 	$(PROTOWRAP) \
 		-I $$(pwd)/vendor \
-		--go_out=plugins=grpc:$$(pwd)/vendor \
+		--go_out=$$(pwd)/vendor \
 		--proto_path $$(pwd)/vendor \
 		--print_structure \
 		--only_specified_files \
@@ -55,7 +55,6 @@ genproto: $(GOIMPORTS) $(PROTOWRAP) $(PROTOC_GEN_GO) vendor
 				xargs printf -- \
 				"$$(pwd)/vendor/$${PROJECT}/%s "); \
 	rm $$(pwd)/vendor/$${PROJECT} || true
-	go mod vendor
 	$(GOIMPORTS) -w .
 
 gengo: genproto
