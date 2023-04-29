@@ -1,0 +1,7 @@
+syntax = "proto3";
+package pio.test;
+
+// TestMsg is a test message used for unit tests.
+message TestMsg {
+  int32 value = 1;
+}
