@@ -6,7 +6,7 @@ replace google.golang.org/protobuf => github.com/aperturerobotics/protobuf-go v1
 
 require (
 	github.com/piprate/json-gold v0.5.0
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 	google.golang.org/protobuf v1.30.0
 )
 
